@@ -1,0 +1,87 @@
+services:
+    mysql:
+        image: mysql:8.4
+        ports:
+            - "3307:3306"
+        env_file:
+            - .env
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+            MYSQL_DATABASE: ${MYSQL_DATABASE:-healthai}
+            MYSQL_USER: ${MYSQL_USER:-healthai}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD:-healthai}
+        volumes:
+          - mysql-data:/var/lib/mysql
+          - ../docs/database/schema.sql:/docker-entrypoint-initdb.d/10_schema.sql:ro
+        networks:
+          - healthai
+        healthcheck:
+          test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+
+    redis:
+        image: redis:7-alpine
+        ports:
+            - "6379:6379"
+        command: ["redis-server", "--appendonly", "yes", "--requirepass", "healthai", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+        networks:
+          - healthai
+
+        healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+
+    tool:
+        image: mysql:8.4
+        command: ["tail", "-f", "/dev/null"]
+        volumes:
+          - mysql-data:/var/lib/mysql
+        networks:
+          - healthai
+    kafka:
+        image: wurstmeister/kafka
+        ports:
+            - "9092:9092"
+        depends_on:
+          zookeeper:
+            condition: service_healthy
+        environment:
+            - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+            - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092
+            - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+        networks:
+          - healthai
+        volumes:
+          - kafka-data:/var/lib/kafka
+        healthcheck:
+          test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "localhost:9092"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+
+    zookeeper:
+        image: wurstmeister/zookeeper
+        ports:
+            - "2181:2181"
+        networks:
+          - healthai
+        volumes:
+          - zookeeper-data:/var/lib/zookeeper
+        healthcheck:
+          test: ["CMD", "nc", "-z", "localhost", "2181"]
+          interval: 10s
+          timeout: 5s
+          retries: 3
+
+volumes:
+    mysql-data:
+    kafka-data:
+    zookeeper-data:
+
+networks:
+  healthai:
+    driver: bridge

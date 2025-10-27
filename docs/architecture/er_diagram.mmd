@@ -1,0 +1,95 @@
+erDiagram
+    USERS ||--o{ HEALTH_PROFILES : owns
+    USERS ||--o{ VITAL_SIGNS : records
+    USERS ||--o{ CONSULTATIONS : initiates
+    CONSULTATIONS ||--o{ PRESCRIPTIONS : generates
+    PRESCRIPTIONS ||--o{ PRESCRIPTION_ITEMS : contains
+    PRESCRIPTION_ITEMS }o--|| MEDICINES : references
+    CONSULTATIONS }o--|| USERS : reviewed_by
+
+    USERS {
+        bigint id PK
+        varchar username
+        varchar password_hash
+        varchar full_name
+        enum gender
+        varchar phone
+        varchar email
+        enum user_type
+        timestamp registered_at
+        timestamp last_login_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    HEALTH_PROFILES {
+        bigint id PK
+        bigint user_id FK
+        date birth_date
+        enum blood_type
+        text chronic_diseases
+        text allergy_history
+        text genetic_risk
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    VITAL_SIGNS {
+        bigint id PK
+        bigint user_id FK
+        timestamp measured_at
+        smallint heart_rate
+        smallint systolic_bp
+        smallint diastolic_bp
+        decimal body_temperature
+        tinyint oxygen_saturation
+        decimal weight
+        enum measurement_source
+        timestamp created_at
+    }
+
+    CONSULTATIONS {
+        bigint id PK
+        bigint user_id FK
+        bigint doctor_id FK
+        text symptom_description
+        text ai_diagnosis
+        text doctor_opinion
+        enum status
+        timestamp created_at
+        timestamp updated_at
+        timestamp closed_at
+    }
+
+    MEDICINES {
+        bigint id PK
+        varchar generic_name
+        varchar brand_name
+        text indications
+        text contraindications
+        text dosage_guideline
+        text drug_interactions
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PRESCRIPTIONS {
+        bigint id PK
+        bigint consultation_id FK
+        bigint doctor_id FK
+        text notes
+        enum status
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PRESCRIPTION_ITEMS {
+        bigint id PK
+        bigint prescription_id FK
+        bigint medicine_id FK
+        varchar dosage_instruction
+        varchar frequency
+        smallint day_supply
+        decimal quantity
+        timestamp created_at
+    }
