@@ -8,10 +8,6 @@ public record ApiResponse<T>(boolean success, T data, String message, Instant ti
         return new ApiResponse<>(true, data, null, Instant.now());
     }
 
-    public static ApiResponse<Void> success() {
-        return new ApiResponse<>(true, null, null, Instant.now());
-    }
-
     public static ApiResponse<Void> failure(String message) {
         return new ApiResponse<>(false, null, message, Instant.now());
     }
