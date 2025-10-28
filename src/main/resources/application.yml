@@ -1,0 +1,80 @@
+spring:
+  application:
+    name: healthai
+  profiles:
+    active: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://localhost:3307/healthai?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: healthai
+    password: healthai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: HealthAiHikariCP
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+  sql:
+    init:
+      mode: never
+  ai:
+    openai:
+      enabled: false
+    ollama:
+      base-url: http://localhost:11434
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  server:
+    port: 9081
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 500
+    default-statement-timeout: 30
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.example.healthai.domain.entity
+logging:
+  level:
+    root: INFO
+    com.example.healthai: DEBUG
+server:
+  port: 8081
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:healthai-test;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: never
+logging:
+  level:
+    root: WARN
+    com.example.healthai: INFO

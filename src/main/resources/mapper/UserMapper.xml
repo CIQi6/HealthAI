@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.auth.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.example.healthai.auth.domain.User">
+        <id property="id" column="id" />
+        <result property="username" column="username" />
+        <result property="passwordHash" column="password_hash" />
+        <result property="fullName" column="full_name" />
+        <result property="gender" column="gender" />
+        <result property="phone" column="phone" />
+        <result property="email" column="email" />
+        <result property="userType" column="user_type" javaType="com.example.healthai.auth.domain.UserType" />
+        <result property="registeredAt" column="registered_at" />
+        <result property="lastLoginAt" column="last_login_at" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password_hash, full_name, gender, phone, email, user_type,
+        registered_at, last_login_at, created_at, updated_at
+    </sql>
+
+    <select id="findByUsername" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.auth.domain.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (username, password_hash, full_name, gender, phone, email, user_type,
+                           registered_at, last_login_at, created_at, updated_at)
+        VALUES (#{username}, #{passwordHash}, #{fullName}, #{gender}, #{phone}, #{email}, #{userType},
+                #{registeredAt}, #{lastLoginAt}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="updateLastLoginAt">
+        UPDATE users
+        SET last_login_at = #{lastLoginAt}, updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
