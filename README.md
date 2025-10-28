@@ -1,7 +1,7 @@
 # HealthAi Backend
 
 ## 概述
-HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号、健康档案、生理指标、问诊、药品库、处方与通知等模块。当前阶段处于 Sprint 0，目标是完成项目脚手架与基础设施搭建。
+HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号、健康档案、生理指标、问诊、药品库、处方与通知等模块。当前阶段进入 Sprint 2，目标是加固认证安全能力并完善运维支撑。
 
 ## Tech Stack
 - Java 17
@@ -10,6 +10,18 @@ HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号�
 - MyBatis + MySQL
 - Redis / Kafka（通过 Docker Compose 提供）
 - SpringDoc OpenAPI 3
+
+## 当前迭代进度（Sprint 2）
+- **认证链路**：`AuthService`、`AuthController` 支持注册、登录、Token 续期与登出；集成测试覆盖核心场景。
+- **Refresh Token 服务**：`RefreshTokenService` 基于 Redis 存储刷新令牌，并提供内存降级策略；`AuthControllerTest` 增加刷新与注销用例。
+- **审计日志**：`AuditTrailService` + `AuditEventMapper` 写入 `audit_events`，覆盖注册/登录/刷新/登出与健康档案操作；`V3__create_audit_events_table.sql` 完成表结构。
+- **秘钥管理**：`JwtSecretResolver` 集成 `SecretManagerClient`，默认使用 `LocalSecretManagerClient` 从环境变量加载秘钥并校验位数。
+- **测试基座**：`AbstractIntegrationTest` 引入 Testcontainers Redis，确保刷新令牌流程在测试环境可用。
+
+## 待完成事项（Sprint 2）
+- **[进行中]** 完成审计日志查询 API 及运维报表。
+- **[待规划]** 与运维确认生产级 Secret Manager 对接与轮换策略。
+- **[待规划]** 实现 Refresh Token 黑名单批量失效工具与运维脚本。
 
 ## 运行前置
 1. 安装 JDK 17+、Maven 3.9+。
@@ -64,7 +76,7 @@ src/main/java/com/example/healthai/
   - 产物：Surefire 测试报告（作为 artifact 上传）
 
 ## Sprint 0 待办
-- [ ] 集成 Flyway 数据迁移
+- [x] 集成 Flyway 数据迁移
 - [x] 完成 CI/CD 流水线（GitHub Actions）
 - [ ] 编写 docker-compose 初始化脚本
 - [ ] 添加更多模块实体与 Mapper

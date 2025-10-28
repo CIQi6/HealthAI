@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.profile.mapper.HealthProfileMapper">
+
+    <resultMap id="HealthProfileResultMap" type="com.example.healthai.profile.domain.HealthProfile">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="birthDate" column="birth_date" />
+        <result property="bloodType" column="blood_type" />
+        <result property="chronicDiseases" column="chronic_diseases" />
+        <result property="allergyHistory" column="allergy_history" />
+        <result property="geneticRisk" column="genetic_risk" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, birth_date, blood_type, chronic_diseases, allergy_history, genetic_risk,
+        created_at, updated_at
+    </sql>
+
+    <select id="findByUserId" resultMap="HealthProfileResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM health_profiles
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findById" resultMap="HealthProfileResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM health_profiles
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.profile.domain.HealthProfile" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO health_profiles (user_id, birth_date, blood_type, chronic_diseases, allergy_history, genetic_risk, created_at, updated_at)
+        VALUES (#{userId}, #{birthDate}, #{bloodType}, #{chronicDiseases}, #{allergyHistory}, #{geneticRisk}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.healthai.profile.domain.HealthProfile">
+        UPDATE health_profiles
+        SET birth_date = #{birthDate},
+            blood_type = #{bloodType},
+            chronic_diseases = #{chronicDiseases},
+            allergy_history = #{allergyHistory},
+            genetic_risk = #{geneticRisk},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM health_profiles WHERE id = #{id}
+    </delete>
+
+</mapper>

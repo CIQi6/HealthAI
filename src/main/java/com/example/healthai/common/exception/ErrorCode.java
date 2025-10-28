@@ -9,7 +9,11 @@ public enum ErrorCode {
     BUSINESS_RULE_VIOLATION("BUS-409", HttpStatus.CONFLICT, "业务规则冲突"),
     INTERNAL_ERROR("SYS-500", HttpStatus.INTERNAL_SERVER_ERROR, "系统异常"),
     UNAUTHORIZED("AUTH-401", HttpStatus.UNAUTHORIZED, "未授权访问"),
-    FORBIDDEN("AUTH-403", HttpStatus.FORBIDDEN, "权限不足");
+    FORBIDDEN("AUTH-403", HttpStatus.FORBIDDEN, "权限不足"),
+    USERNAME_ALREADY_EXISTS("AUTH-409", HttpStatus.CONFLICT, "用户名已存在"),
+    INVALID_CREDENTIALS("AUTH-400", HttpStatus.BAD_REQUEST, "账号或密码错误"),
+    REFRESH_TOKEN_INVALID("AUTH-410", HttpStatus.UNAUTHORIZED, "刷新令牌无效"),
+    REFRESH_TOKEN_EXPIRED("AUTH-411", HttpStatus.UNAUTHORIZED, "刷新令牌已过期");
 
     private final String code;
     private final HttpStatus httpStatus;

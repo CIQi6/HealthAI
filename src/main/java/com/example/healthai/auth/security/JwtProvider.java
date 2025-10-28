@@ -10,18 +10,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.example.healthai.auth.config.JwtProperties;
+import com.example.healthai.security.JwtSecretResolver;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtProvider {
 
     private final JwtProperties properties;
+    private final JwtSecretResolver jwtSecretResolver;
 
-    public JwtProvider(JwtProperties properties) {
+    public JwtProvider(JwtProperties properties, JwtSecretResolver jwtSecretResolver) {
         this.properties = properties;
+        this.jwtSecretResolver = jwtSecretResolver;
     }
 
     public String generateToken(Authentication authentication) {
@@ -32,23 +34,26 @@ public class JwtProvider {
         } else {
             username = principal.toString();
         }
+        return generateToken(username);
+    }
 
+    public String generateToken(String username) {
         Instant now = Instant.now();
-        Instant expiry = now.plus(properties.expireMinutes(), ChronoUnit.MINUTES);
+        Instant expiry = now.plus(properties.getExpireMinutes(), ChronoUnit.MINUTES);
 
         return Jwts.builder()
                 .subject(username)
-                .issuer(properties.issuer())
+                .issuer(properties.getIssuer())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
-                .signWith(Keys.hmacShaKeyFor(properties.secret().getBytes()))
+                .signWith(jwtSecretResolver.getSigningKey())
                 .compact();
     }
 
     public Optional<String> validateAndGetSubject(String token) {
         try {
             Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(properties.secret().getBytes()))
+                    .verifyWith(jwtSecretResolver.getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -56,5 +61,9 @@ public class JwtProvider {
         } catch (Exception ex) {
             return Optional.empty();
         }
+    }
+
+    public long getExpirySeconds() {
+        return properties.getExpireMinutes() * 60L;
     }
 }

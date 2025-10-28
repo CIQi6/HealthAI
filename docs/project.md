@@ -220,6 +220,98 @@ flowchart LR
 | Sprint 4 | 第 8 周 | `DrugSvc`、`RxSvc` | 药品库维护与处方生成 | Sprint 3 问诊输出、MySQL 扩展 | 药品维护 API、禁忌症校验、处方聚合、处方明细、审计/导出、性能调优报告 |
 | Sprint 5 | 第 9 周 | 安全 & 观测、部署 | 上线前验证与运维体系完善 | 全量功能、CI/CD 管道 | 安全加固（RBAC、日志、脱敏）、性能/压测、监控告警配置、部署剧本、发布回滚方案、验收文档 |
 
+### Sprint 1 进度追踪（AuthSvc + ProfileSvc）
+
+- **阶段小结**：认证与健康档案主干流程已全量打通，接口通过集成测试验证，具备交付验收条件。
+- **功能覆盖**：患者注册、登录、JWT 认证、当前用户查询、健康档案 CRUD、自建档案首登自动创建均已实现。
+- **测试情况**：`src/test/java/com/example/healthai/auth/controller/AuthControllerTest.java` 与 `profile/controller/HealthProfileControllerTest.java` 覆盖注册、登录、档案创建/查询/删除等核心路径。
+- **风险与阻塞**：Refresh Token 与安全审计仍待设计；生产环境 JWT 秘钥管理需在 Sprint 2 明确。
+
+- **[已完成]** 依赖与配置：`pom.xml` 引入 `spring-boot-starter-validation`、`flyway-core`、`springdoc-openapi`、`jjwt` 等依赖；`src/main/resources/application.properties` 配置 MyBatis、Flyway、JWT 与数据源参数。
+- **[已完成]** 数据库迁移：`src/main/resources/db/migration/V1__create_users_table.sql` 与 `V2__create_health_profiles_table.sql` 创建用户与健康档案表。
+- **[已完成]** 领域与持久化：`com.example.healthai.auth.domain` 与 `profile.domain` 建立实体，`auth/mapper`、`profile/mapper` 及对应 XML 完成 CRUD 能力。
+- **[已完成]** 安全链路：`auth/config/SecurityConfig.java` 将 `JwtAuthenticationFilter` 加入过滤链，启用无状态会话与端点权限控制。
+- **[已完成]** 业务集成：`AuthService` 持久化用户后自动初始化健康档案；`HealthProfileService` 支持 `createOrUpdate`、`findByUsername`、`findById`、`delete` 等操作。
+- **[已完成]** 接口层：`AuthController` 提供 `/api/v1/auth/*`，`HealthProfileController` 提供 `/api/v1/health-profiles/*`，结合 DTO 与参数校验实现 REST API。
+- **[已完成]** 测试覆盖：MockMvc 集成测试验证注册、登录、获取档案、更新档案、删除档案等核心场景。
+- **[进行中]** 文档与运维：本次更新同步 Sprint 1 状态，后续需补充 API 示例与环境变量模版说明。
+- **[规划中]** 后续增强：Refresh Token、异常告警与审计日志将在 Sprint 2+ 迭代中推进。
+
+#### Sprint 1 API 使用示例
+
+- **注册用户**
+  ```bash
+  curl -X POST http://localhost:8081/api/v1/auth/register \
+    -H "Content-Type: application/json" \
+    -d '{
+      "username": "demo_user",
+      "password": "Password123",
+      "fullName": "Demo User",
+      "gender": "unknown",
+      "phone": "13800001111",
+      "email": "demo@example.com"
+    }'
+  ```
+
+- **登录并获取 JWT**
+  ```bash
+  curl -X POST http://localhost:8081/api/v1/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{
+      "username": "demo_user",
+      "password": "Password123"
+    }'
+  ```
+
+- **查询当前健康档案**
+  ```bash
+  TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"username":"demo_user","password":"Password123"}' | jq -r '.data.token')
+
+  curl -X GET http://localhost:8081/api/v1/health-profiles \
+    -H "Authorization: Bearer ${TOKEN}"
+  ```
+
+- **更新健康档案**
+  ```bash
+  curl -X POST http://localhost:8081/api/v1/health-profiles \
+    -H "Authorization: Bearer ${TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "birthDate": "1990-01-01",
+      "bloodType": "A",
+      "chronicDiseases": "Hypertension",
+      "allergyHistory": "Peanuts",
+      "geneticRisk": "Low"
+    }'
+  ```
+
+#### Sprint 1 环境准备清单
+
+- **数据库与基础设施**：运行 `docker-compose.yml` 提供 MySQL、Redis、Kafka；确保 `MYSQL_*` 变量与 `.env` 一致。
+- **应用配置**：在 `.env` 设置 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD`、`JWT_SECRET` 等变量；本地可使用 `.env.example` 作为模板。
+- **数据迁移**：首次启动应用时确认 Flyway 迁移 `V1__create_users_table.sql`、`V2__create_health_profiles_table.sql` 已执行。
+- **开放端口**：默认应用监听 `8081`，确保未被占用；MySQL 通过 `3307` 暴露。
+- **可观测性**：`/actuator/health` 用于基础健康检查；后续可接入 Prometheus 采集。
+
+#### Sprint 1 部署注意事项
+
+- **配置管理**：生产环境需将 `JWT_SECRET`、数据库凭据托管在安全密钥管理服务，避免硬编码。
+- **日志规范**：确保 `GlobalExceptionHandler` 输出包含追踪 ID，便于后续审计扩展。
+- **备份策略**：MySQL 建议每日全量备份，保留 7 天；Redis/Kafka 可采用持久化或镜像备份。
+- **回滚方案**：保留上一个稳定版本的镜像与 Flyway 回滚脚本（若有），以支持快速恢复。
+- **访问控制**：在网关层限制 `/api/v1/auth/*` 的速率阈值，防止暴力破解。
+
+#### Sprint 1 结项总结与 Sprint 2 风险评估
+
+- **[总结]** 功能交付完成度高，认证与档案流程已通过自动化集成测试，具备上线验证条件。
+- **[风险] Refresh Token**：当前仅支持单一 Access Token；需在 Sprint 2 设计 `refresh_token` 存储机制（建议使用 Redis + 旋转策略）并更新 `AuthController` 与 `JwtProvider`。
+- **[风险] 审计日志**：缺乏统一审计事件模型；建议引入 `AuditEvent`/`AuditTrailService`，在 `AuthService`、`HealthProfileService` 关键操作上记录用户、操作类型、时间与上下文。
+- **[风险] 秘钥管理**：`JWT_SECRET` 仅通过配置项注入；需与运维协同在生产采用 KMS/Secret Manager，配合启动时校验与轮换策略。
+- **[后续动作]** Sprint 2 开始前完成以上三项方案评审与技术设计文档，作为迭代首要任务。
+- **[资料]** 设计细节已整理于 `docs/sprint2-plan.md`，供评审与任务拆解使用。
+
 ## 数据库设计
 
 ### 设计原则
