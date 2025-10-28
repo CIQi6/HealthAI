@@ -1,6 +1,6 @@
 # HealthAi Backend
 
-## Overview
+## 概述
 HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号、健康档案、生理指标、问诊、药品库、处方与通知等模块。当前阶段处于 Sprint 0，目标是完成项目脚手架与基础设施搭建。
 
 ## Tech Stack
