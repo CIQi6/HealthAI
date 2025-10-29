@@ -60,6 +60,7 @@ public abstract class AbstractIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         ensureSchema();
+        resetTable("audit_events", "id");
         resetTable("consultation_messages", "id");
         resetTable("consultations", "id");
         resetTable("prompt_templates", "id");
@@ -92,13 +93,17 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected User createUser(String username, String rawPassword) {
+        return createUser(username, rawPassword, UserType.PATIENT);
+    }
+
+    protected User createUser(String username, String rawPassword, UserType userType) {
         LocalDateTime now = LocalDateTime.now();
         User user = User.builder()
             .username(username)
             .passwordHash(passwordEncoder.encode(rawPassword))
             .fullName("Test User")
             .gender("unknown")
-            .userType(UserType.PATIENT)
+            .userType(userType)
             .phone("13800000000")
             .email(username + "@example.com")
             .registeredAt(now)

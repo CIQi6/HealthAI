@@ -15,4 +15,5 @@ public class ConsultationKafkaProperties {
     private String reviewedTopic = "healthai.consultations.reviewed";
     private String closedTopic = "healthai.consultations.closed";
     private String failedTopic = "healthai.consultations.failed";
+    private boolean consumerEnabled = false;
 }

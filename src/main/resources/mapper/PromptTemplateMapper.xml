@@ -38,6 +38,18 @@
         ORDER BY code ASC, version DESC
     </select>
 
+    <select id="findAll" resultMap="PromptTemplateResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM prompt_templates
+        ORDER BY code ASC, version DESC
+    </select>
+
+    <select id="findById" parameterType="long" resultMap="PromptTemplateResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM prompt_templates
+        WHERE id = #{id}
+    </select>
+
     <insert id="insert" parameterType="com.example.healthai.prompt.domain.PromptTemplate" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO prompt_templates (code, channel, model_name, language, version, description, content, variables, enabled, created_at, updated_at)
         VALUES (#{code}, #{channel}, #{modelName}, #{language}, #{version}, #{description}, #{content}, #{variables}, #{enabled}, #{createdAt}, #{updatedAt})

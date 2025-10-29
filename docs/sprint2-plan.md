@@ -64,14 +64,13 @@
   - ✅ 编写集成测试覆盖登录、刷新、登出、失效场景（参见 `AuthControllerTest#shouldRefreshToken`、`#shouldRevokeRefreshTokenOnLogout`）。
 - **审计日志**
   - ✅ 创建 Flyway 脚本 `V3__create_audit_events_table.sql` 并完成迁移。
-  - ✅ 实现 `AuditEvent` 实体、Mapper、Service`AuditTrailService`。
   - ✅ 在 `AuthService`、`HealthProfileService` 埋点核心操作与异常分支。
-  - ⏳ 增加测试验证日志写入（待补充基于 `JdbcTemplate` 的断言或 Mapper 查询）。
+  - ⏳ 增加测试验证日志写入（待补充基于 `JdbcTemplate` 的断言或 Mapper 查询，已转入 Sprint 3 Backlog）。
 - **秘钥管理**
   - ✅ 引入配置结构支持主备秘钥（`JwtProperties` 与 `JwtSecretResolver`）。
   - ✅ 封装 Secret 加载接口（`SecretManagerClient` + `LocalSecretManagerClient`）。
-  - ⏳ 更新 `application.properties` 与文档说明，补充生产 Secret Manager 对接示例。
-  - ⏳ 输出秘钥轮换操作手册草稿，与运维协同中。
+  - ⏳ 更新 `application.properties` 与文档说明，补充生产 Secret Manager 对接示例（已转入 Sprint 3 文档任务）。
+  - ⏳ 输出秘钥轮换操作手册草稿，与运维协同中（已转入 Sprint 3 文档任务）。
 
 ## 6. 未决事项
 - 与运维确认目标环境 Secret 管理服务选型。

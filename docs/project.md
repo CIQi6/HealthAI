@@ -6,7 +6,8 @@ HealthAi 面向 **患者端** 提供一体化的 AI 辅助医疗服务，构建�
 ## 2025-10-29 进度速记
 - **安全链路**：更新 `SecurityConfig` 禁用匿名访问并自定义 `authenticationEntryPoint`，未授权访问统一返回 HTTP 401。
 - **集成测试稳定性**：在 `TestRedisConfiguration` 提供 `PromptService`、`AuditTrailService` 测试桩，并在 `ConsultationControllerIntegrationTest` 中通过 `@MockBean KafkaTemplate` 与 `CompletableFuture` 屏蔽真实 Kafka 依赖，修复 500 超时与 403 校验失败问题。
-- **验证结果**：`ConsultationControllerIntegrationTest` 全部用例通过，Docker Kafka 清理后可正常启动，测试运行不再依赖外部服务。
+- **AI 问诊主干**：落地 `ConsultationService`、`ConsultationController`、`PromptService` 与 `OllamaLlmClient`，打通问诊创建、AI 初诊、医生复核流程，Kafka 事件、审计日志与提示词渲染协同工作。
+- **文档计划调整**：Sprint 2 未完测试/运维文档与秘钥 Runbook 转入 Sprint 3 Backlog，确保迭代聚焦问诊体验。
 
 ## 总体目标
 - **临床辅助**：以 AI 初诊 + 医生复核的流程提升问诊效率，降低漏诊风险。
@@ -239,8 +240,8 @@ flowchart LR
 - **[已完成]** 业务集成：`AuthService` 持久化用户后自动初始化健康档案；`HealthProfileService` 支持 `createOrUpdate`、`findByUsername`、`findById`、`delete` 等操作。
 - **[已完成]** 接口层：`AuthController` 提供 `/api/v1/auth/*`，`HealthProfileController` 提供 `/api/v1/health-profiles/*`，结合 DTO 与参数校验实现 REST API。
 - **[已完成]** 测试覆盖：MockMvc 集成测试验证注册、登录、获取档案、更新档案、删除档案等核心场景。
-- **[进行中]** 文档与运维：本次更新同步 Sprint 1 状态，后续需补充 API 示例与环境变量模版说明。
-- **[规划中]** 后续增强：Refresh Token、异常告警与审计日志将在 Sprint 2+ 迭代中推进。
+- **[已转移至 Sprint 3]** 文档与运维：API 示例、环境变量模板与运维说明合并至 Sprint 3 文档任务。
+- **[已转移至 Sprint 3]** 后续增强：Refresh Token 黑名单、异常告警与审计日志查询 API 在 Sprint 3 起继续推进。
 
 #### Sprint 1 API 使用示例
 
@@ -314,17 +315,71 @@ flowchart LR
 - **[风险] Refresh Token**：当前仅支持单一 Access Token；需在 Sprint 2 设计 `refresh_token` 存储机制（建议使用 Redis + 旋转策略）并更新 `AuthController` 与 `JwtProvider`。
 - **[风险] 审计日志**：缺乏统一审计事件模型；建议引入 `AuditEvent`/`AuditTrailService`，在 `AuthService`、`HealthProfileService` 关键操作上记录用户、操作类型、时间与上下文。
 - **[风险] 秘钥管理**：`JWT_SECRET` 仅通过配置项注入；需与运维协同在生产采用 KMS/Secret Manager，配合启动时校验与轮换策略。
-- **[后续动作]** Sprint 2 开始前完成以上三项方案评审与技术设计文档，作为迭代首要任务。
+- **[已转移至 Sprint 3]** 上述风险相关的文档与运维方案将随 Sprint 3 Backlog 继续迭代。
 - **[资料]** 设计细节已整理于 `docs/sprint2-plan.md`，供评审与任务拆解使用，Sprint 3 方案详见 `docs/sprint3-plan.md`。
+
+### Sprint 3 进度追踪（ConsultSvc + PromptSvc + LLM 适配）
+
+- **阶段小结**：问诊主干流程已初步打通，`ConsultationService`、`ConsultationController`、`PromptService` 与 `OllamaLlmClient` 完成联调，支持患者发起问诊到 AI 初诊、医生复核的端到端链路。
+- **功能覆盖**：问诊创建/查询/详情/复核/关闭接口、提示词模板渲染、LLM 通道选择、Kafka 事件发布与审计日志埋点均可用，支持 AI 失败回退至 `FAILED` 状态。
+- **测试情况**：`ConsultationControllerIntegrationTest` 覆盖问诊创建、医生复核与权限校验；Redis/Kafka 依赖通过测试桩与 `@MockBean` 消除外部耦合。
+- **风险与阻塞**：提示词模板管理界面、Notification 订阅方、审计查询 API 尚未交付；Kafka 事件消费者仍需实现；AI 失败告警需补充告警规则。
+- **后续动作**：完善 Prompt 模板管理、事件消费与通知联动；补充审计日志查询与运维文档；根据 Sprint 2 秘钥任务安排输出 Runbook。
+- **[资料]** 设计细节参见 `docs/sprint3-plan.md`，最新实现可参考 `com.example.healthai.consult.service.ConsultationService` 与 `com.example.healthai.prompt.service.PromptService`。
 
 ### Sprint 2 进度追踪（Refresh Token + 审计日志 + 秘钥管理）
 
 - **阶段小结**：认证安全增强项已交付，包括刷新令牌、审计日志与秘钥管理方案落地，为 Sprint 3 问诊模块奠定安全基线。
 - **功能覆盖**：`RefreshTokenService` 支持旋转策略与 Redis 存储，`AuditTrailService` 覆盖认证与健康档案关键操作，`JwtSecretResolver` 接入本地/远程秘钥加载流程。
 - **测试情况**：`AuthControllerTest` 覆盖登录、刷新、登出与失效场景；引入 Testcontainers Redis 验证刷新令牌链路。
-- **风险与阻塞**：审计日志查询 API 与运维报表仍在规划中；生产环境 Secret Manager 选型待与运维确认。
-- **后续动作**：完善 Refresh Token 黑名单工具、输出秘钥轮换 Runbook；将审计查询 API 纳入 Sprint 3 或后续迭代安排。
+- **风险与阻塞**：审计日志查询 API、秘钥轮换 Runbook 与文档补充已明确延后，等待 Sprint 3 时序与运维窗口。
+- **后续动作**：相关文档、Runbook 与审计查询 API 已转入 Sprint 3 Backlog，刷新 Token 黑名单工具将在问诊模块交付后继续推进。
 - **[资料]** 设计细节参见 `docs/sprint2-plan.md`。
+
+#### JWT 秘钥轮换 Runbook（2025-10-29 更新）
+
+1. **准备阶段**
+   - 在 Secret Manager 中创建两组密钥：`healthai/security/jwt/primary` 与 `healthai/security/jwt/secondary`，保证长度 ≥ 32 字节。
+   - 更新 `application-prod.yml`：
+     ```yaml
+     healthai:
+       security:
+         jwt:
+           secret-source: secret-manager
+           secret-id-primary: healthai/security/jwt/primary
+           secret-id-secondary: healthai/security/jwt/secondary
+     ```
+   - 通过 `SecretManagerClient` 本地脚本执行预检：`./gradlew run --args='--check-secret healthai/security/jwt/primary'`。
+
+2. **轮换流程**
+   - **T-10 分钟**：向业务方广播维护窗口，在 `AlertingService` 中标记只读模式（`application-maintenance=true`）。
+   - **步骤 1**：在 Secret Manager 中写入新密钥到 `secret-id-secondary`，保持 `secret-id-primary` 不变。
+   - **步骤 2**：调用运维 API `/actuator/refresh` 或滚动重启应用，让 `JwtSecretResolver` 拉取最新副密钥，并验证现有 Token 仍可校验。
+   - **步骤 3**：在监控面板确认 10 分钟内无 JWT 校验失败后，将新密钥写入 `secret-id-primary`，同时把旧主密钥写入 `secret-id-secondary` 备份槽位。
+   - **步骤 4**：再次触发配置刷新，监控登录/刷新 Token 成功率 ≥ 99.5%。
+   - **步骤 5**：清理旧密钥（7 天后）并归档轮换记录到 `docs/runbooks/jwt-rotation.md`。
+
+3. **回滚策略**
+   - 若出现大规模认证失败，立即将旧主密钥写回 `secret-id-primary`，执行配置刷新。
+   - 通过 `AuditEventAdminController` 查询轮换窗口内的 `ACTION_AUTH_REFRESH_FAILED` 事件，确认恢复情况。
+
+#### Secret Manager 对接示例（Azure Key Vault）
+
+```yaml
+healthai:
+  security:
+    jwt:
+      secret-source: azure-key-vault
+      azure:
+        vault-url: https://healthai-secrets.vault.azure.net
+        client-id: ${AZURE_CLIENT_ID}
+        client-secret: ${AZURE_CLIENT_SECRET}
+        tenant-id: ${AZURE_TENANT_ID}
+        secret-name-primary: healthai-jwt-primary
+        secret-name-secondary: healthai-jwt-secondary
+```
+
+部署时需为运行身份授予 `get`, `list`, `set` 权限，`JwtSecretResolver` 将在启动前校验主/备秘钥均可访问，否则阻止应用启动。
 
 ## 数据库设计
 

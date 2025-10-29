@@ -28,4 +28,49 @@
         )
     </insert>
 
+    <sql id="Search_Conditions">
+        <if test="resourceType != null and resourceType != ''">
+            AND resource_type = #{resourceType}
+        </if>
+        <if test="action != null and action != ''">
+            AND action = #{action}
+        </if>
+        <if test="actorId != null">
+            AND actor_id = #{actorId}
+        </if>
+        <if test="from != null">
+            AND occurred_at &gt;= #{from}
+        </if>
+        <if test="to != null">
+            AND occurred_at &lt;= #{to}
+        </if>
+    </sql>
+
+    <select id="search" resultType="com.example.healthai.audit.domain.AuditEvent">
+        SELECT
+            id,
+            occurred_at,
+            actor_id,
+            actor_type,
+            action,
+            resource_type,
+            resource_id,
+            source_ip,
+            metadata,
+            created_at,
+            updated_at
+        FROM audit_events
+        WHERE 1 = 1
+        <include refid="Search_Conditions" />
+        ORDER BY occurred_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM audit_events
+        WHERE 1 = 1
+        <include refid="Search_Conditions" />
+    </select>
+
 </mapper>

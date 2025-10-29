@@ -15,6 +15,10 @@ public interface PromptTemplateMapper {
 
     List<PromptTemplate> findAllActive();
 
+    Optional<PromptTemplate> findById(@Param("id") Long id);
+
+    List<PromptTemplate> findAll();
+
     int insert(PromptTemplate template);
 
     int update(PromptTemplate template);
