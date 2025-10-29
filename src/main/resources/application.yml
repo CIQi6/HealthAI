@@ -36,6 +36,16 @@ mybatis:
     default-statement-timeout: 30
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.example.healthai.domain.entity
+healthai:
+  llm:
+    primary-channel: OLLAMA
+    ollama:
+      base-url: http://localhost:11434
+      model: llama3
+      timeout: 60s
+      max-retries: 1
+    http:
+      enabled: false
 logging:
   level:
     root: INFO

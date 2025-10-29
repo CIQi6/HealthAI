@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.consult.mapper.ConsultationMapper">
+
+    <resultMap id="ConsultationResultMap" type="com.example.healthai.consult.domain.Consultation">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="doctorId" column="doctor_id" />
+        <result property="symptomDescription" column="symptom_description" />
+        <result property="aiDiagnosis" column="ai_diagnosis" />
+        <result property="doctorOpinion" column="doctor_opinion" />
+        <result property="status" column="status" javaType="com.example.healthai.consult.domain.ConsultationStatus" />
+        <result property="aiModel" column="ai_model" />
+        <result property="aiLatencyMs" column="ai_latency_ms" />
+        <result property="aiErrorCode" column="ai_error_code" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <result property="closedAt" column="closed_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, doctor_id, symptom_description, ai_diagnosis, doctor_opinion, status,
+        ai_model, ai_latency_ms, ai_error_code, created_at, updated_at, closed_at
+    </sql>
+
+    <select id="findById" resultMap="ConsultationResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM consultations
+        WHERE id = #{id}
+    </select>
+
+    <select id="search" resultMap="ConsultationResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM consultations
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="doctorId != null">
+                AND doctor_id = #{doctorId}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+        <if test="offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.consult.domain.Consultation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO consultations (user_id, doctor_id, symptom_description, ai_diagnosis, doctor_opinion, status,
+                                   ai_model, ai_latency_ms, ai_error_code, created_at, updated_at, closed_at)
+        VALUES (#{userId}, #{doctorId}, #{symptomDescription}, #{aiDiagnosis}, #{doctorOpinion}, #{status},
+                #{aiModel}, #{aiLatencyMs}, #{aiErrorCode}, #{createdAt}, #{updatedAt}, #{closedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.healthai.consult.domain.Consultation">
+        UPDATE consultations
+        SET doctor_id = #{doctorId},
+            symptom_description = #{symptomDescription},
+            ai_diagnosis = #{aiDiagnosis},
+            doctor_opinion = #{doctorOpinion},
+            status = #{status},
+            ai_model = #{aiModel},
+            ai_latency_ms = #{aiLatencyMs},
+            ai_error_code = #{aiErrorCode},
+            updated_at = #{updatedAt},
+            closed_at = #{closedAt}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

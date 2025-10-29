@@ -13,7 +13,11 @@ public enum ErrorCode {
     USERNAME_ALREADY_EXISTS("AUTH-409", HttpStatus.CONFLICT, "用户名已存在"),
     INVALID_CREDENTIALS("AUTH-400", HttpStatus.BAD_REQUEST, "账号或密码错误"),
     REFRESH_TOKEN_INVALID("AUTH-410", HttpStatus.UNAUTHORIZED, "刷新令牌无效"),
-    REFRESH_TOKEN_EXPIRED("AUTH-411", HttpStatus.UNAUTHORIZED, "刷新令牌已过期");
+    REFRESH_TOKEN_EXPIRED("AUTH-411", HttpStatus.UNAUTHORIZED, "刷新令牌已过期"),
+    PROMPT_TEMPLATE_NOT_FOUND("PROMPT-404", HttpStatus.NOT_FOUND, "提示词模板不存在"),
+    LLM_CALL_FAILED("LLM-500", HttpStatus.BAD_GATEWAY, "大模型调用失败"),
+    LLM_TIMEOUT("LLM-504", HttpStatus.GATEWAY_TIMEOUT, "大模型响应超时"),
+    PROMPT_RENDER_FAILED("PROMPT-500", HttpStatus.INTERNAL_SERVER_ERROR, "提示词渲染失败");
 
     private final String code;
     private final HttpStatus httpStatus;

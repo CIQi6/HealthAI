@@ -310,7 +310,16 @@ flowchart LR
 - **[风险] 审计日志**：缺乏统一审计事件模型；建议引入 `AuditEvent`/`AuditTrailService`，在 `AuthService`、`HealthProfileService` 关键操作上记录用户、操作类型、时间与上下文。
 - **[风险] 秘钥管理**：`JWT_SECRET` 仅通过配置项注入；需与运维协同在生产采用 KMS/Secret Manager，配合启动时校验与轮换策略。
 - **[后续动作]** Sprint 2 开始前完成以上三项方案评审与技术设计文档，作为迭代首要任务。
-- **[资料]** 设计细节已整理于 `docs/sprint2-plan.md`，供评审与任务拆解使用。
+- **[资料]** 设计细节已整理于 `docs/sprint2-plan.md`，供评审与任务拆解使用，Sprint 3 方案详见 `docs/sprint3-plan.md`。
+
+### Sprint 2 进度追踪（Refresh Token + 审计日志 + 秘钥管理）
+
+- **阶段小结**：认证安全增强项已交付，包括刷新令牌、审计日志与秘钥管理方案落地，为 Sprint 3 问诊模块奠定安全基线。
+- **功能覆盖**：`RefreshTokenService` 支持旋转策略与 Redis 存储，`AuditTrailService` 覆盖认证与健康档案关键操作，`JwtSecretResolver` 接入本地/远程秘钥加载流程。
+- **测试情况**：`AuthControllerTest` 覆盖登录、刷新、登出与失效场景；引入 Testcontainers Redis 验证刷新令牌链路。
+- **风险与阻塞**：审计日志查询 API 与运维报表仍在规划中；生产环境 Secret Manager 选型待与运维确认。
+- **后续动作**：完善 Refresh Token 黑名单工具、输出秘钥轮换 Runbook；将审计查询 API 纳入 Sprint 3 或后续迭代安排。
+- **[资料]** 设计细节参见 `docs/sprint2-plan.md`。
 
 ## 数据库设计
 

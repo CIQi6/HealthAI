@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.consult.mapper.ConsultationMessageMapper">
+
+    <resultMap id="ConsultationMessageResultMap" type="com.example.healthai.consult.domain.ConsultationMessage">
+        <id property="id" column="id" />
+        <result property="consultationId" column="consultation_id" />
+        <result property="role" column="role" javaType="com.example.healthai.consult.domain.ConsultationMessageRole" />
+        <result property="sequenceNo" column="sequence_no" />
+        <result property="content" column="content" />
+        <result property="tokenUsage" column="token_usage" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, consultation_id, role, sequence_no, content, token_usage, created_at, updated_at
+    </sql>
+
+    <select id="findByConsultationId" resultMap="ConsultationMessageResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM consultation_messages
+        WHERE consultation_id = #{consultationId}
+        ORDER BY sequence_no ASC
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.consult.domain.ConsultationMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO consultation_messages (consultation_id, role, sequence_no, content, token_usage, created_at, updated_at)
+        VALUES (#{consultationId}, #{role}, #{sequenceNo}, #{content}, #{tokenUsage}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO consultation_messages (consultation_id, role, sequence_no, content, token_usage, created_at, updated_at)
+        VALUES
+        <foreach collection="messages" item="item" separator=",">
+            (#{item.consultationId}, #{item.role}, #{item.sequenceNo}, #{item.content}, #{item.tokenUsage},
+             #{item.createdAt}, #{item.updatedAt})
+        </foreach>
+    </insert>
+
+</mapper>

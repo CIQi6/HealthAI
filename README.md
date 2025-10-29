@@ -1,7 +1,7 @@
 # HealthAi Backend
 
 ## 概述
-HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号、健康档案、生理指标、问诊、药品库、处方与通知等模块。当前阶段进入 Sprint 2，目标是加固认证安全能力并完善运维支撑。
+HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号、健康档案、生理指标、问诊、药品库、处方与通知等模块。当前阶段进入 Sprint 3，聚焦问诊流程、提示词服务与 LLM 适配能力建设。
 
 ## Tech Stack
 - Java 17
@@ -11,17 +11,18 @@ HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号�
 - Redis / Kafka（通过 Docker Compose 提供）
 - SpringDoc OpenAPI 3
 
-## 当前迭代进度（Sprint 2）
-- **认证链路**：`AuthService`、`AuthController` 支持注册、登录、Token 续期与登出；集成测试覆盖核心场景。
-- **Refresh Token 服务**：`RefreshTokenService` 基于 Redis 存储刷新令牌，并提供内存降级策略；`AuthControllerTest` 增加刷新与注销用例。
-- **审计日志**：`AuditTrailService` + `AuditEventMapper` 写入 `audit_events`，覆盖注册/登录/刷新/登出与健康档案操作；`V3__create_audit_events_table.sql` 完成表结构。
-- **秘钥管理**：`JwtSecretResolver` 集成 `SecretManagerClient`，默认使用 `LocalSecretManagerClient` 从环境变量加载秘钥并校验位数。
-- **测试基座**：`AbstractIntegrationTest` 引入 Testcontainers Redis，确保刷新令牌流程在测试环境可用。
+## 当前迭代进度（Sprint 3）
+- **问诊服务规划**：`docs/sprint3-plan.md` 定义 `ConsultSvc`、`PromptSvc`、LLM 适配层的领域模型、接口与任务拆解。
+- **PromptSvc 设计**：明确提示词模板管理、上下文拼装策略以及与问诊服务的集成方式。
+- **LLM 适配方案**：完成统一 `LLMClient` 抽象的容错策略设计，支持 `Ollama` 与外部 HTTP 渠道。
+- **事件与通知**：规划 `healthai.consultations.*` Kafka 主题，为通知服务与后续 `RxSvc` 打通数据链路。
+- **数据层建设**：新增 `V4~V6` Flyway 迁移与 `ConsultationMapper`、`PromptTemplateMapper` 等持久化组件，完成问诊与提示词的基础数据结构。
+- **LLM 客户端骨架**：实现 `OllamaLlmClient`、`HttpApiLlmClient`，结合 `LlmProperties` 支持多渠道配置与超时/重试策略。
 
-## 待完成事项（Sprint 2）
-- **[进行中]** 完成审计日志查询 API 及运维报表。
-- **[待规划]** 与运维确认生产级 Secret Manager 对接与轮换策略。
-- **[待规划]** 实现 Refresh Token 黑名单批量失效工具与运维脚本。
+## 待完成事项（Sprint 3）
+- **[进行中]** 实现 `ConsultSvc` REST API、状态机及数据持久化。
+- **[待规划]** 完成 Prompt 模板管理接口与多渠道配置。
+- **[待规划]** 集成 Kafka 事件发布与 `NotificationSvc` 通知触达。
 
 ## 运行前置
 1. 安装 JDK 17+、Maven 3.9+。
