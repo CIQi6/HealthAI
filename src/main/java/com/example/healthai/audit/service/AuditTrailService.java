@@ -29,13 +29,22 @@ public class AuditTrailService {
         record(action, AuditConstants.RESOURCE_HEALTH_PROFILE, actorId, actorType, resourceId, null, metadata);
     }
 
-    private void record(String action,
-                        String resourceType,
-                        Long actorId,
-                        String actorType,
-                        String resourceId,
-                        String sourceIp,
-                        String metadata) {
+    public void recordConsultationEvent(String action,
+                                        Long actorId,
+                                        String actorType,
+                                        String resourceId,
+                                        String sourceIp,
+                                        String metadata) {
+        record(action, AuditConstants.RESOURCE_CONSULTATION, actorId, actorType, resourceId, sourceIp, metadata);
+    }
+
+    public void record(String action,
+                       String resourceType,
+                       Long actorId,
+                       String actorType,
+                       String resourceId,
+                       String sourceIp,
+                       String metadata) {
         try {
             LocalDateTime now = LocalDateTime.now();
             AuditEvent event = AuditEvent.builder()

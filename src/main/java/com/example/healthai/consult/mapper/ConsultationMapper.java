@@ -20,6 +20,10 @@ public interface ConsultationMapper {
                               @Param("limit") Integer limit,
                               @Param("offset") Integer offset);
 
+    long count(@Param("userId") Long userId,
+               @Param("doctorId") Long doctorId,
+               @Param("status") ConsultationStatus status);
+
     int insert(Consultation consultation);
 
     int update(Consultation consultation);

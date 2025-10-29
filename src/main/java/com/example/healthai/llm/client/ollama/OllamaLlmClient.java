@@ -24,7 +24,6 @@ import com.example.healthai.prompt.domain.PromptChannel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class OllamaLlmClient implements LlmClient {
 
     private static final Logger log = LoggerFactory.getLogger(OllamaLlmClient.class);
@@ -32,20 +31,24 @@ public class OllamaLlmClient implements LlmClient {
     private final RestClient restClient;
     private final LlmProperties.OllamaProperties properties;
 
+    public OllamaLlmClient(RestClient restClient, LlmProperties.OllamaProperties properties) {
+        this.restClient = restClient;
+        this.properties = properties;
+    }
+
     @Override
     public PromptChannel channel() {
         return PromptChannel.OLLAMA;
     }
-
     @Override
     public LlmResponse generate(LlmRequest request) {
+
         String model = StringUtils.hasText(request.getModel()) ? request.getModel() : properties.getModel();
         if (!StringUtils.hasText(model)) {
             throw new BusinessException(ErrorCode.LLM_CALL_FAILED, "未配置 Ollama 模型");
         }
 
         OllamaRequest payload = new OllamaRequest(model, request.getPrompt(), request.getOptions(), request.getMaxTokens(), request.getTemperature());
-
         RestClientException lastException = null;
         int attempts = properties.getMaxRetries() != null && properties.getMaxRetries() > 0 ? properties.getMaxRetries() : 1;
 

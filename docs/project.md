@@ -3,6 +3,11 @@
 ## 项目概述
 HealthAi 面向 **患者端** 提供一体化的 AI 辅助医疗服务，构建覆盖账号管理、健康档案、生理指标监测、问诊记录、药品管理与处方开具的端到端解决方案。系统需兼容本地 `Ollama` 与外部大模型 API，通过 Spring 生态实现安全、可扩展的企业级后端能力。
 
+## 2025-10-29 进度速记
+- **安全链路**：更新 `SecurityConfig` 禁用匿名访问并自定义 `authenticationEntryPoint`，未授权访问统一返回 HTTP 401。
+- **集成测试稳定性**：在 `TestRedisConfiguration` 提供 `PromptService`、`AuditTrailService` 测试桩，并在 `ConsultationControllerIntegrationTest` 中通过 `@MockBean KafkaTemplate` 与 `CompletableFuture` 屏蔽真实 Kafka 依赖，修复 500 超时与 403 校验失败问题。
+- **验证结果**：`ConsultationControllerIntegrationTest` 全部用例通过，Docker Kafka 清理后可正常启动，测试运行不再依赖外部服务。
+
 ## 总体目标
 - **临床辅助**：以 AI 初诊 + 医生复核的流程提升问诊效率，降低漏诊风险。
 - **健康管理**：帮助患者实时掌握生理指标趋势，获得个性化健康建议。

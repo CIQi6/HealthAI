@@ -17,7 +17,10 @@ public enum ErrorCode {
     PROMPT_TEMPLATE_NOT_FOUND("PROMPT-404", HttpStatus.NOT_FOUND, "提示词模板不存在"),
     LLM_CALL_FAILED("LLM-500", HttpStatus.BAD_GATEWAY, "大模型调用失败"),
     LLM_TIMEOUT("LLM-504", HttpStatus.GATEWAY_TIMEOUT, "大模型响应超时"),
-    PROMPT_RENDER_FAILED("PROMPT-500", HttpStatus.INTERNAL_SERVER_ERROR, "提示词渲染失败");
+    PROMPT_RENDER_FAILED("PROMPT-500", HttpStatus.INTERNAL_SERVER_ERROR, "提示词渲染失败"),
+    CONSULTATION_NOT_FOUND("CONSULT-404", HttpStatus.NOT_FOUND, "问诊记录不存在"),
+    CONSULTATION_FORBIDDEN("CONSULT-403", HttpStatus.FORBIDDEN, "无权访问问诊记录"),
+    CONSULTATION_STATUS_CONFLICT("CONSULT-409", HttpStatus.CONFLICT, "问诊状态不允许当前操作");
 
     private final String code;
     private final HttpStatus httpStatus;

@@ -29,6 +29,18 @@ spring:
     health:
   server:
     port: 9081
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:19092}
+    consumer:
+      group-id: healthai-dev
+      auto-offset-reset: earliest
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    properties:
+      spring.json.add.type.headers: false
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
@@ -46,6 +58,13 @@ healthai:
       max-retries: 1
     http:
       enabled: false
+  kafka:
+    consultation:
+      created-topic: healthai.consultations.created
+      ai-reviewed-topic: healthai.consultations.ai_reviewed
+      reviewed-topic: healthai.consultations.reviewed
+      closed-topic: healthai.consultations.closed
+      failed-topic: healthai.consultations.failed
 logging:
   level:
     root: INFO

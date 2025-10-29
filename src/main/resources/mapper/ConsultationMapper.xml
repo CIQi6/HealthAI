@@ -52,6 +52,22 @@
         </if>
     </select>
 
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM consultations
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="doctorId != null">
+                AND doctor_id = #{doctorId}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
     <insert id="insert" parameterType="com.example.healthai.consult.domain.Consultation" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO consultations (user_id, doctor_id, symptom_description, ai_diagnosis, doctor_opinion, status,
                                    ai_model, ai_latency_ms, ai_error_code, created_at, updated_at, closed_at)

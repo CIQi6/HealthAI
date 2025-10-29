@@ -3,7 +3,6 @@ package com.example.healthai;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -15,20 +14,16 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
+
+import com.example.healthai.config.TestRedisConfiguration;
 import com.example.healthai.auth.domain.User;
 import com.example.healthai.auth.domain.UserType;
 import com.example.healthai.auth.mapper.UserMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flywaydb.core.Flyway;
+import org.springframework.context.annotation.Import;
 
 /**
  * Abstract integration test class.
@@ -39,7 +34,7 @@ import org.flywaydb.core.Flyway;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Testcontainers
+@Import(TestRedisConfiguration.class)
 public abstract class AbstractIntegrationTest {
 
     @Autowired
@@ -60,24 +55,14 @@ public abstract class AbstractIntegrationTest {
     @Autowired(required = false)
     private Flyway flyway;
 
-    @Container
-    private static final GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:7-alpine"))
-        .withExposedPorts(6379)
-        .waitingFor(Wait.forLogMessage(".*Ready to accept connections.*\\n", 1))
-        .withStartupTimeout(Duration.ofSeconds(60));
-
-    @DynamicPropertySource
-    static void configureRedis(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
-        registry.add("spring.data.redis.password", () -> "");
-    }
-
     private static final AtomicBoolean schemaInitialized = new AtomicBoolean(false);
 
     @BeforeEach
     void cleanDatabase() {
         ensureSchema();
+        resetTable("consultation_messages", "id");
+        resetTable("consultations", "id");
+        resetTable("prompt_templates", "id");
         resetTable("health_profiles", "id");
         resetTable("users", "id");
     }

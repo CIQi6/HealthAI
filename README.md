@@ -13,11 +13,10 @@ HealthAi 是一个基于 Spring Boot 的医疗健康后台系统，提供账号�
 
 ## 当前迭代进度（Sprint 3）
 - **问诊服务规划**：`docs/sprint3-plan.md` 定义 `ConsultSvc`、`PromptSvc`、LLM 适配层的领域模型、接口与任务拆解。
-- **PromptSvc 设计**：明确提示词模板管理、上下文拼装策略以及与问诊服务的集成方式。
-- **LLM 适配方案**：完成统一 `LLMClient` 抽象的容错策略设计，支持 `Ollama` 与外部 HTTP 渠道。
-- **事件与通知**：规划 `healthai.consultations.*` Kafka 主题，为通知服务与后续 `RxSvc` 打通数据链路。
+- **PromptSvc 设计**：完成提示词执行服务 `PromptService`，支持模板变量合并与 LLM 调用。
+- **LLM 适配方案**：落地 `OllamaLlmClient`、`HttpApiLlmClient` 与 `LlmConfiguration`，结合 `healthai.llm.*` 配置实现多渠道扩展与超时/重试策略。
+- **Kafka 事件流**：新增 `healthai.consultations.*` 主题配置，通过 `ConsultationService` 发布创建、AI 复核、医生复核、关闭、失败等事件。
 - **数据层建设**：新增 `V4~V6` Flyway 迁移与 `ConsultationMapper`、`PromptTemplateMapper` 等持久化组件，完成问诊与提示词的基础数据结构。
-- **LLM 客户端骨架**：实现 `OllamaLlmClient`、`HttpApiLlmClient`，结合 `LlmProperties` 支持多渠道配置与超时/重试策略。
 
 ## 待完成事项（Sprint 3）
 - **[进行中]** 实现 `ConsultSvc` REST API、状态机及数据持久化。
