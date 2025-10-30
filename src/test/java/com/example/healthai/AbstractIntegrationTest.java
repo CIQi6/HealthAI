@@ -60,6 +60,10 @@ public abstract class AbstractIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         ensureSchema();
+        resetTable("contraindication_audit", "id");
+        resetTable("prescription_items", "id");
+        resetTable("prescriptions", "id");
+        resetTable("medicines", "id");
         resetTable("audit_events", "id");
         resetTable("consultation_messages", "id");
         resetTable("consultations", "id");

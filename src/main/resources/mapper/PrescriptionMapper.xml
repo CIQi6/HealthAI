@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.prescription.mapper.PrescriptionMapper">
+
+    <resultMap id="PrescriptionItemResultMap" type="com.example.healthai.prescription.domain.PrescriptionItem">
+        <id property="id" column="item_id" />
+        <result property="prescriptionId" column="id" />
+        <result property="medicineId" column="medicine_id" />
+        <result property="dosageInstruction" column="dosage_instruction" />
+        <result property="frequency" column="frequency" />
+        <result property="daySupply" column="day_supply" />
+        <result property="quantity" column="quantity" />
+        <result property="contraResult" column="contra_result" javaType="com.example.healthai.prescription.domain.PrescriptionContraStatus" />
+        <result property="createdAt" column="item_created_at" />
+        <result property="updatedAt" column="item_updated_at" />
+    </resultMap>
+
+    <resultMap id="PrescriptionResultMap" type="com.example.healthai.prescription.domain.Prescription">
+        <id property="id" column="id" />
+        <result property="consultationId" column="consultation_id" />
+        <result property="patientId" column="patient_id" />
+        <result property="doctorId" column="doctor_id" />
+        <result property="status" column="status" javaType="com.example.healthai.prescription.domain.PrescriptionStatus" />
+        <result property="notes" column="notes" />
+        <result property="contraCheckStatus" column="contra_check_status" javaType="com.example.healthai.prescription.domain.PrescriptionContraStatus" />
+        <result property="contraFailReason" column="contra_fail_reason" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <collection property="items" ofType="com.example.healthai.prescription.domain.PrescriptionItem" resultMap="PrescriptionItemResultMap" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        p.id, p.consultation_id, p.patient_id, p.doctor_id, p.status, p.notes,
+        p.contra_check_status, p.contra_fail_reason, p.created_at, p.updated_at
+    </sql>
+
+    <sql id="Item_Column_List">
+        i.id AS item_id, i.medicine_id, i.dosage_instruction, i.frequency, i.day_supply,
+        i.quantity, i.contra_result, i.created_at AS item_created_at, i.updated_at AS item_updated_at
+    </sql>
+
+    <select id="findById" resultMap="PrescriptionResultMap">
+        SELECT <include refid="Base_Column_List" />,
+               <include refid="Item_Column_List" />
+        FROM prescriptions p
+        LEFT JOIN prescription_items i ON p.id = i.prescription_id
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="search" resultMap="PrescriptionResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM prescriptions p
+        <where>
+            <if test="consultationId != null">
+                AND p.consultation_id = #{consultationId}
+            </if>
+            <if test="patientId != null">
+                AND p.patient_id = #{patientId}
+            </if>
+            <if test="doctorId != null">
+                AND p.doctor_id = #{doctorId}
+            </if>
+            <if test="status != null">
+                AND p.status = #{status}
+            </if>
+        </where>
+        ORDER BY p.created_at DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+        <if test="offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM prescriptions p
+        <where>
+            <if test="consultationId != null">
+                AND p.consultation_id = #{consultationId}
+            </if>
+            <if test="patientId != null">
+                AND p.patient_id = #{patientId}
+            </if>
+            <if test="doctorId != null">
+                AND p.doctor_id = #{doctorId}
+            </if>
+            <if test="status != null">
+                AND p.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.prescription.domain.Prescription" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO prescriptions (consultation_id, patient_id, doctor_id, status, notes, contra_check_status,
+                                   contra_fail_reason, created_at, updated_at)
+        VALUES (#{consultationId}, #{patientId}, #{doctorId}, #{status}, #{notes}, #{contraCheckStatus},
+                #{contraFailReason}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.healthai.prescription.domain.Prescription">
+        UPDATE prescriptions
+        SET consultation_id = #{consultationId},
+            patient_id = #{patientId},
+            doctor_id = #{doctorId},
+            status = #{status},
+            notes = #{notes},
+            contra_check_status = #{contraCheckStatus},
+            contra_fail_reason = #{contraFailReason},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE prescriptions
+        SET status = #{status},
+            contra_check_status = #{contraStatus},
+            contra_fail_reason = #{contraFailReason},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

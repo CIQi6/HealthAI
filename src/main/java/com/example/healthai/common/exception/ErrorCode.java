@@ -20,7 +20,12 @@ public enum ErrorCode {
     PROMPT_RENDER_FAILED("PROMPT-500", HttpStatus.INTERNAL_SERVER_ERROR, "提示词渲染失败"),
     CONSULTATION_NOT_FOUND("CONSULT-404", HttpStatus.NOT_FOUND, "问诊记录不存在"),
     CONSULTATION_FORBIDDEN("CONSULT-403", HttpStatus.FORBIDDEN, "无权访问问诊记录"),
-    CONSULTATION_STATUS_CONFLICT("CONSULT-409", HttpStatus.CONFLICT, "问诊状态不允许当前操作");
+    CONSULTATION_STATUS_CONFLICT("CONSULT-409", HttpStatus.CONFLICT, "问诊状态不允许当前操作"),
+    DRUG_NOT_FOUND("DRUG-404", HttpStatus.NOT_FOUND, "药品不存在"),
+    DRUG_GENERIC_NAME_CONFLICT("DRUG-409", HttpStatus.CONFLICT, "药品通用名已存在"),
+    DRUG_CONTRAINDICATED("DRUG-412", HttpStatus.PRECONDITION_FAILED, "药品存在禁忌，无法继续"),
+    PRESCRIPTION_NOT_FOUND("RX-404", HttpStatus.NOT_FOUND, "处方不存在"),
+    PRESCRIPTION_STATUS_CONFLICT("RX-409", HttpStatus.CONFLICT, "处方状态不允许当前操作");
 
     private final String code;
     private final HttpStatus httpStatus;

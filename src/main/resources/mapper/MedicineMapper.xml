@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.drug.mapper.MedicineMapper">
+
+    <resultMap id="MedicineResultMap" type="com.example.healthai.drug.domain.Medicine">
+        <id property="id" column="id" />
+        <result property="genericName" column="generic_name" />
+        <result property="brandName" column="brand_name" />
+        <result property="indications" column="indications" />
+        <result property="contraindications" column="contraindications" />
+        <result property="dosageGuideline" column="dosage_guideline" />
+        <result property="drugInteractions" column="drug_interactions" />
+        <result property="tags" column="tags" />
+        <result property="version" column="version" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, generic_name, brand_name, indications, contraindications, dosage_guideline,
+        drug_interactions, tags, version, created_at, updated_at
+    </sql>
+
+    <select id="findById" resultMap="MedicineResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM medicines
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByGenericName" resultMap="MedicineResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM medicines
+        WHERE generic_name = #{genericName}
+        LIMIT 1
+    </select>
+
+    <select id="search" resultMap="MedicineResultMap">
+        SELECT <include refid="Base_Column_List" />
+        FROM medicines
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    generic_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR brand_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR tags LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="contraindication != null and contraindication != ''">
+                AND contraindications LIKE CONCAT('%', #{contraindication}, '%')
+            </if>
+        </where>
+        ORDER BY updated_at DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+        <if test="offset != null">
+            OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM medicines
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    generic_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR brand_name LIKE CONCAT('%', #{keyword}, '%')
+                    OR tags LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+            <if test="contraindication != null and contraindication != ''">
+                AND contraindications LIKE CONCAT('%', #{contraindication}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.drug.domain.Medicine" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO medicines (generic_name, brand_name, indications, contraindications, dosage_guideline,
+                               drug_interactions, tags, version, created_at, updated_at)
+        VALUES (#{genericName}, #{brandName}, #{indications}, #{contraindications}, #{dosageGuideline},
+                #{drugInteractions}, #{tags}, #{version}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.healthai.drug.domain.Medicine">
+        UPDATE medicines
+        SET generic_name = #{genericName},
+            brand_name = #{brandName},
+            indications = #{indications},
+            contraindications = #{contraindications},
+            dosage_guideline = #{dosageGuideline},
+            drug_interactions = #{drugInteractions},
+            tags = #{tags},
+            version = #{version},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM medicines WHERE id = #{id}
+    </delete>
+
+</mapper>

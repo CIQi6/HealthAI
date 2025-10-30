@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.healthai.prescription.mapper.ContraindicationAuditMapper">
+
+    <resultMap id="ContraindicationAuditResultMap" type="com.example.healthai.prescription.domain.ContraindicationAudit">
+        <id property="id" column="id" />
+        <result property="prescriptionId" column="prescription_id" />
+        <result property="prescriptionItemId" column="prescription_item_id" />
+        <result property="checkTime" column="check_time" />
+        <result property="checker" column="checker" />
+        <result property="patientSnapshot" column="patient_snapshot" />
+        <result property="violations" column="violations" />
+        <result property="result" column="result" javaType="com.example.healthai.prescription.domain.PrescriptionContraStatus" />
+        <result property="message" column="message" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="findByPrescriptionId" resultMap="ContraindicationAuditResultMap">
+        SELECT id, prescription_id, prescription_item_id, check_time, checker,
+               patient_snapshot, violations, result, message, created_at, updated_at
+        FROM contraindication_audit
+        WHERE prescription_id = #{prescriptionId}
+        ORDER BY check_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.example.healthai.prescription.domain.ContraindicationAudit" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO contraindication_audit (prescription_id, prescription_item_id, check_time, checker,
+                                            patient_snapshot, violations, result, message, created_at, updated_at)
+        VALUES (#{prescriptionId}, #{prescriptionItemId}, #{checkTime}, #{checker},
+                #{patientSnapshot}, #{violations}, #{result}, #{message}, #{createdAt}, #{updatedAt})
+    </insert>
+
+</mapper>

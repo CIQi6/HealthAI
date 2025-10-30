@@ -7,10 +7,10 @@
 
 ## 2. 范围与交付物
 - **ConsultSvc**：问诊域模型、状态机、REST API、与审计/通知的集成。
-- **PromptSvc**：提示词模板管理、上下文拼装策略、面向 `ConsultSvc` 的服务接口。
+- **PromptSvc**：提示词模板管理、上下文拼装策略、面向 `ConsultSvc` 的服务接口。（已交付后台管理 API 与 `PromptTemplateAdminController`/`PromptTemplateAdminService`，支持模板增删改查、启停与版本管理）
 - **LLM Adapter**：统一调用抽象，封装 `Ollama` 与 HTTP API 渠道，提供熔断与重试策略。
 - **数据层扩展**：新增问诊、提示词、对话消息等表结构的 Flyway 脚本与 Mapper。
-- **事件与通知**：Kafka 事件流（`healthai.consultations.*`）与告警/通知触发骨架。
+- **事件与通知**：Kafka 事件流（`healthai.consultations.*`）与告警/通知触发骨架。（`ConsultationService` 发布事件，`ConsultationEventListener` + `NotificationService` 消费；默认 `healthai.kafka.consultation.consumer-enabled=false`，需在部署环境开启并配置告警渠道）
 - **测试与文档**：集成测试覆盖主要流程，完善 API 示例与系统文档。
 
 ## 3. 关键业务流程

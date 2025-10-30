@@ -223,7 +223,7 @@ flowchart LR
 | Sprint 1 | 第 2-3 周 | `AuthSvc`、`ProfileSvc` | 完成用户认证与健康档案能力 | Sprint 0 基础设施、MySQL Schema | 实体/Mapper、REST API、JWT 登录、档案 CRUD、接口测试、基础错误处理 |
 | Sprint 2 | 第 4-5 周 | `VitalSvc`、`NotificationSvc`(初版) | 生理指标采集与阈值告警 | Sprint 1 用户体系、Redis、Kafka | 指标上报 API、Kafka 事件流、Redis 阈值缓存、告警通知骨架、Prometheus 指标暴露 |
 | Sprint 3 | 第 6-7 周 | `ConsultSvc`、`PromptSvc`、LLM 适配层 | 打通 AI 问诊与医生复核流程 | Sprint 1-2 数据、Ollama/外部模型接入 | 问诊 API、提示词模板、LLM 调用封装、AI/医生诊断流程、审计日志、异步任务处理 |
-| Sprint 4 | 第 8 周 | `DrugSvc`、`RxSvc` | 药品库维护与处方生成 | Sprint 3 问诊输出、MySQL 扩展 | 药品维护 API、禁忌症校验、处方聚合、处方明细、审计/导出、性能调优报告 |
+| Sprint 4 | 第 8 周 | `DrugSvc`、`RxSvc` | 药品库维护与处方生成 | Sprint 3 问诊输出、MySQL 扩展 | 详见 `docs/sprint4-plan.md`：药品维护 API、禁忌症校验、处方聚合、处方明细、审计/导出、性能调优 |
 | Sprint 5 | 第 9 周 | 安全 & 观测、部署 | 上线前验证与运维体系完善 | 全量功能、CI/CD 管道 | 安全加固（RBAC、日志、脱敏）、性能/压测、监控告警配置、部署剧本、发布回滚方案、验收文档 |
 
 ### Sprint 1 进度追踪（AuthSvc + ProfileSvc）
@@ -320,12 +320,12 @@ flowchart LR
 
 ### Sprint 3 进度追踪（ConsultSvc + PromptSvc + LLM 适配）
 
-- **阶段小结**：问诊主干流程已初步打通，`ConsultationService`、`ConsultationController`、`PromptService` 与 `OllamaLlmClient` 完成联调，支持患者发起问诊到 AI 初诊、医生复核的端到端链路。
-- **功能覆盖**：问诊创建/查询/详情/复核/关闭接口、提示词模板渲染、LLM 通道选择、Kafka 事件发布与审计日志埋点均可用，支持 AI 失败回退至 `FAILED` 状态。
-- **测试情况**：`ConsultationControllerIntegrationTest` 覆盖问诊创建、医生复核与权限校验；Redis/Kafka 依赖通过测试桩与 `@MockBean` 消除外部耦合。
-- **风险与阻塞**：提示词模板管理界面、Notification 订阅方、审计查询 API 尚未交付；Kafka 事件消费者仍需实现；AI 失败告警需补充告警规则。
-- **后续动作**：完善 Prompt 模板管理、事件消费与通知联动；补充审计日志查询与运维文档；根据 Sprint 2 秘钥任务安排输出 Runbook。
-- **[资料]** 设计细节参见 `docs/sprint3-plan.md`，最新实现可参考 `com.example.healthai.consult.service.ConsultationService` 与 `com.example.healthai.prompt.service.PromptService`。
+- **阶段小结**：问诊主干流程已初步打通，`ConsultationService`、`ConsultationController`、`PromptService` 与 `OllamaLlmClient` 完成联调，提示词模板后台管理 API 与 Kafka 通知消费链路同步上线，支持患者发起问诊到 AI 初诊、医生复核的端到端链路。
+- **功能覆盖**：问诊创建/查询/详情/复核/关闭接口、提示词模板渲染与后台管理、LLM 通道选择、Kafka 事件发布与消费、审计日志埋点均可用，支持 AI 失败回退至 `FAILED` 状态并触发告警占位实现。
+- **测试情况**：`ConsultationControllerIntegrationTest` 覆盖问诊创建、医生复核与权限校验；`PromptTemplateAdminControllerTest` 验证模板管理增删改查；Kafka 事件在测试环境通过桩/`@MockBean` 消除外部依赖。
+- **风险与阻塞**：审计查询 API 与运维文档仍待交付；通知链路默认关闭消费者（`healthai.kafka.consultation.consumer-enabled=false`），需在部署环境显式开启并配置告警渠道。
+- **后续动作**：补充审计日志查询与运维文档；完善 `AlertingService` 外部告警适配；整理 Prompt 模板管理后台使用指引与配置示例。
+- **[资料]** 设计细节参见 `docs/sprint3-plan.md`，最新实现可参考 `com.example.healthai.consult.service.ConsultationService` 与 `com.example.healthai.prompt.service.PromptService`；下一阶段规划见 `docs/sprint4-plan.md`。
 
 ### Sprint 2 进度追踪（Refresh Token + 审计日志 + 秘钥管理）
 
